@@ -55,6 +55,7 @@ const MybatisLogParser = () => {
   const handleParse = () => {
     const result = parseSQL(sqlLog);
     setParsedSQL(result);
+    handleCopy();
   };
 
   const handleCopy = async () => {
