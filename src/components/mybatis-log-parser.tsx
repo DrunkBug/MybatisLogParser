@@ -44,14 +44,16 @@ const MybatisLogParser = () => {
       const trimmedParam = param.trim();
       const typeStartIndex = trimmedParam.lastIndexOf('(');
       const typeEndIndex = trimmedParam.lastIndexOf(')');
-      
-      if (typeStartIndex === -1 || typeEndIndex === -1) return;
-      
+
+      if (trimmedParam !== 'null' && (typeStartIndex === -1 || typeEndIndex === -1)) return;
+
       const tempStr = trimmedParam.substring(0, typeStartIndex)?.trim();
       const typeStr = trimmedParam.substring(typeStartIndex + 1, typeEndIndex);
 
       if (typeStr === 'String' || typeStr === 'Timestamp' || typeStr === 'Date') {
         result = result.replace('?', `'${tempStr}'`);
+      } else if (trimmedParam === 'null') {
+        result = result.replace('?', null);
       } else {
         result = result.replace('?', tempStr);
       }
@@ -92,14 +94,14 @@ const MybatisLogParser = () => {
     try {
       // 1. 读取剪贴板内容
       const clipboardText = await navigator.clipboard.readText();
-      
+
       // 2. 设置到输入框
       setSqlLog(clipboardText);
-      
+
       // 3. 解析SQL
       const result = parseSQL(clipboardText);
       setParsedSQL(result);
-      
+
       // 4. 如果解析成功，自动复制回剪贴板
       if (result) {
         await navigator.clipboard.writeText(result);
@@ -107,7 +109,7 @@ const MybatisLogParser = () => {
       } else {
         setCopyMessage('解析失败，请检查日志格式！');
       }
-      
+
       setTimeout(() => setCopyMessage(''), 3000);
     } catch (err) {
       setCopyMessage('自动粘贴失败，请检查浏览器权限！');
@@ -129,7 +131,7 @@ const MybatisLogParser = () => {
   const divStyle = {
     color: 'rgb(50, 205, 50)',    // 设置字体颜色
     fontSize: '1.5em',  // 设置字体大小
-    fontWeight:'bold'
+    fontWeight: 'bold'
   };
 
   const autoPasteButtonStyle = {
@@ -178,7 +180,7 @@ const MybatisLogParser = () => {
             </Button>
           </div>
         </div>
-    
+
         {/* Output Section */}
         <div className="flex-1 p-4">
           <label style={divStyle} className="block text-green-600 text-lg font-medium mb-2">解析结果：</label>
