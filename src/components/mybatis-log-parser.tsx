@@ -130,7 +130,7 @@ const MybatisLogParser = () => {
 
   const divStyle = {
     color: 'rgb(50, 205, 50)',    // 设置字体颜色
-    fontSize: '1.5em',  // 设置字体大小
+    fontSize: '1em',  // 设置字体大小
     fontWeight: 'bold'
   };
 
@@ -146,7 +146,7 @@ const MybatisLogParser = () => {
       <Card className="h-full flex">
         {/* Input Section */}
         <div className="flex-1 p-4" style={divStyle}>
-          <label style={divStyle} className="block text-gray-700 text-lg font-medium mb-2">输入MyBatis SQL日志：</label>
+          <label style={divStyle} className="block text-green-600 text-lg font-medium mb-2">输入MyBatis SQL日志：</label>
           <TextArea
             value={sqlLog}
             onChange={(e) => setSqlLog(e.target.value)}
@@ -167,7 +167,7 @@ const MybatisLogParser = () => {
             <Button
               icon={<DeleteOutlined />}
               onClick={handleClear}
-              className="mr-2"
+              style={{ marginRight: '10px' }}
             >
               清空
             </Button>
