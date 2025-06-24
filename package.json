@@ -4,12 +4,14 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
+    "@monaco-editor/react": "^4.7.0",
     "antd": "^5.23.0",
     "cra-template": "1.2.0",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-scripts": "5.0.1",
+    "sql-formatter": "^15.6.5",
     "web-vitals": "^4.2.4"
   },
   "scripts": {

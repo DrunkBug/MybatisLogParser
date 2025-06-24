@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from 'antd';
-import { Button } from "antd";
-import { Input } from 'antd';
+import React, { useState } from 'react';
+import { Card, Button, Input, message } from 'antd';
+import { format } from 'sql-formatter';
 import { CodeOutlined, DeleteOutlined, CopyOutlined, ScissorOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 
@@ -62,15 +61,29 @@ const MybatisLogParser = () => {
     return result;
   };
 
+  const formatSQL = (sql) => {
+    try {
+      return format(sql, {
+        language: 'sql',
+        indent: '  ',
+      });
+    } catch (error) {
+      return sql; // 如果格式化失败，返回原始SQL
+    }
+  };
+
   const handleParse = () => {
     const result = parseSQL(sqlLog);
     setParsedSQL(result);
   };
 
+  // 格式化 SQL
+  const formattedSQL = formatSQL(parsedSQL);
+
   const handleCopy = async () => {
     try {
-      if (parsedSQL) {
-        await navigator.clipboard.writeText(parsedSQL);
+      if (formattedSQL) {
+        await navigator.clipboard.writeText(formattedSQL);
         setCopyMessage('SQL已复制到剪贴板！');
         setTimeout(() => setCopyMessage(''), 3000);
       } else {
@@ -102,10 +115,11 @@ const MybatisLogParser = () => {
       const result = parseSQL(clipboardText);
       setParsedSQL(result);
 
-      // 4. 如果解析成功，自动复制回剪贴板
+      // 4. 如果解析成功，格式化SQL并复制回剪贴板
       if (result) {
-        await navigator.clipboard.writeText(result);
-        setCopyMessage('已自动解析并复制SQL到剪贴板！');
+        const formatted = formatSQL(result);
+        await navigator.clipboard.writeText(formatted);
+        setCopyMessage('已自动解析并复制格式化SQL到剪贴板！');
       } else {
         setCopyMessage('解析失败，请检查日志格式！');
       }
@@ -122,15 +136,15 @@ const MybatisLogParser = () => {
   const elementStyle = {
     display: 'flex',
     border: '0px deepskyblue solid',
-    width: '100%', // Considered responsiveness
+    width: '100%',
     height: '50px',
-    justifyContent: 'flex-end', // Right aligns the content
-    alignItems: 'center' // Vertically centers the content
+    justifyContent: 'flex-end',
+    alignItems: 'center'
   };
 
   const divStyle = {
-    color: 'rgba(56, 142, 30, 1)',    // 设置字体颜色
-    fontSize: '1em',  // 设置字体大小
+    color: 'rgba(56, 142, 30, 1)',
+    fontSize: '1em',
     fontWeight: 'bold'
   };
 
@@ -185,11 +199,12 @@ const MybatisLogParser = () => {
         <div className="flex-1 p-4">
           <label style={divStyle} className="block text-green-600 text-lg font-medium mb-2">解析结果：</label>
           <TextArea
-            value={parsedSQL}
+            value={formattedSQL}
             readOnly
             rows={12}
             placeholder="解析后的SQL将显示在这里..."
             className="w-full mt-2"
+            style={{ fontFamily: 'Monaco, Consolas, monospace' }}
           />
           <div style={elementStyle} className="flex justify-end mt-4">
             <Button
@@ -200,7 +215,7 @@ const MybatisLogParser = () => {
             </Button>
           </div>
           {copyMessage && (
-            <div className="text-sm text-blue-500 text-right mt-2 animate-fade-out">
+            <div className="text-sm text-blue-500 text-right mt-2">
               {copyMessage}
             </div>
           )}
