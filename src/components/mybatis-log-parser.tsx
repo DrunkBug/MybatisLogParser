@@ -129,7 +129,7 @@ const MybatisLogParser = () => {
   };
 
   const divStyle = {
-    color: 'rgb(50, 205, 50)',    // 设置字体颜色
+    color: 'rgba(56, 142, 30, 1)',    // 设置字体颜色
     fontSize: '1em',  // 设置字体大小
     fontWeight: 'bold'
   };
