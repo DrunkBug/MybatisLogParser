@@ -64,8 +64,7 @@ const MybatisLogParser = () => {
   const formatSQL = (sql) => {
     try {
       return format(sql, {
-        language: 'sql',
-        indent: '  ',
+        language: 'mysql'
       });
     } catch (error) {
       return sql; // 如果格式化失败，返回原始SQL
