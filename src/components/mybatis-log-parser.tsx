@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Card, Button, Input, message } from 'antd';
 import { format } from 'sql-formatter';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow,prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CodeOutlined, DeleteOutlined, CopyOutlined, ScissorOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 
@@ -163,7 +165,7 @@ const MybatisLogParser = () => {
           <TextArea
             value={sqlLog}
             onChange={(e) => setSqlLog(e.target.value)}
-            rows={12}
+            rows={6}
             placeholder="请粘贴MyBatis日志..."
             className="w-full mt-2"
           />
@@ -194,17 +196,31 @@ const MybatisLogParser = () => {
           </div>
         </div>
 
-        {/* Output Section */}
+        {/* Output Section with SQL Syntax Highlighting */}
         <div className="flex-1 p-4">
           <label style={divStyle} className="block text-green-600 text-lg font-medium mb-2">解析结果：</label>
-          <TextArea
-            value={formattedSQL}
-            readOnly
-            rows={12}
-            placeholder="解析后的SQL将显示在这里..."
-            className="w-full mt-2"
-            style={{ fontFamily: 'Monaco, Consolas, monospace' }}
-          />
+          <div className="w-full mt-2 border rounded" style={{ height: '450px', overflow: 'auto' }}>
+            {formattedSQL ? (
+              <SyntaxHighlighter
+                language="sql"
+                style={prism}
+                showLineNumbers={true}
+                wrapLines={true}
+                customStyle={{
+                  margin: 0,
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  lineHeight: '1.4'
+                }}
+              >
+                {formattedSQL}
+              </SyntaxHighlighter>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-400 bg-gray-50 rounded">
+                解析后的SQL将显示在这里...
+              </div>
+            )}
+          </div>
           <div style={elementStyle} className="flex justify-end mt-4">
             <Button
               icon={<CopyOutlined />}
