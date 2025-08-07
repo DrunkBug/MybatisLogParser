@@ -17,7 +17,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       run: npm ci
@@ -27,6 +26,12 @@ jobs:
 
     - name: Build project
       run: npm run build
+
+    - name: Package build
+      run: |
+        cd build
+        zip -r ../mybatis-log-parser-build.zip .
+        cd ..
 
     - name: Create Release
       id: create_release
@@ -45,6 +50,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build
+        asset_path: ./mybatis-log-parser-build.zip
         asset_name: mybatis-log-parser-build.zip
         asset_content_type: application/zip
