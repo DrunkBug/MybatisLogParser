@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Card, Button, Input, message } from 'antd';
+import { Card, Button, Input } from 'antd';
 import { format } from 'sql-formatter';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { tomorrow,prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CodeOutlined, DeleteOutlined, CopyOutlined, ScissorOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 
