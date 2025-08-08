@@ -56,3 +56,16 @@ jobs:
         asset_path: ./mybatis-log-parser-build.zip
         asset_name: mybatis-log-parser-build.zip
         asset_content_type: application/zip
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy to Server
+      run: |
+        scp mybatis-log-parser-build.zip ${{ secrets.USER }}@${{ secrets.IP }}:/var/www/122383.xyz/MybatisLogParser/
+        ssh "${{ secrets.USER }}@${{ secrets.IP }}" << EOF
+          cd /var/www/122383.xyz/MybatisLogParser
+          unzip -o mybatis-log-parser-build.zip -d .
+          rm -f mybatis-log-parser-build.zip
+          nginx -s reload || echo "nginx reload failed or not needed"
+        EOF
