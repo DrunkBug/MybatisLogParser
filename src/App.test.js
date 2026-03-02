@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import App from './App';
+import MybatisLogParser from './components/mybatis-log-parser.tsx';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('renders parser title', () => {
+  render(<MybatisLogParser />);
+  const titleElement = screen.getByText(/MyBatis Log Parser/i);
+  expect(titleElement).toBeInTheDocument();
 });
