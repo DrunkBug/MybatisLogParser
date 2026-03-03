@@ -63,6 +63,55 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
+## Docker Image Build (GitHub Actions + GHCR)
+
+The repository includes a workflow: `.github/workflows/docker-image.yml`.
+
+- On push to `main` or tags like `v1.0.0`, GitHub Actions builds and pushes image to `ghcr.io`.
+- On PR to `main`, it only validates Docker build (no push).
+
+Image naming rule:
+
+```text
+ghcr.io/<owner>/<repo>
+```
+
+For this repository, it will be:
+
+```text
+ghcr.io/osake/mybatislogparser
+```
+
+## Deploy with docker-compose
+
+1. Prepare env file:
+
+```bash
+cp .env.example .env
+```
+
+2. Login to GHCR on target server:
+
+```bash
+echo "<GHCR_PAT>" | docker login ghcr.io -u "<github-username>" --password-stdin
+```
+
+3. Pull and start:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+4. Check service:
+
+```bash
+docker compose ps
+curl -f http://127.0.0.1:${HTTP_PORT:-3003}/healthz
+```
+
+The application will be exposed on `127.0.0.1:${HTTP_PORT}` (default `127.0.0.1:3003`).
+
 ## How to Use
 
 1. Copy MyBatis log output containing SQL statements
