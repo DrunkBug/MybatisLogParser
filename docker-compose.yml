@@ -1,6 +1,6 @@
 services:
   mybatis-log-parser:
-    image: ${IMAGE_NAME:-ghcr.io/osake/mybatislogparser}:${IMAGE_TAG:-latest}
+    image: ${IMAGE_NAME:-ghcr.io/drunkbug/mybatislogparser}:${IMAGE_TAG:-latest}
     container_name: mybatis-log-parser
     pull_policy: always
     restart: unless-stopped

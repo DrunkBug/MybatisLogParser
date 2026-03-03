@@ -79,7 +79,7 @@ ghcr.io/<owner>/<repo>
 For this repository, it will be:
 
 ```text
-ghcr.io/osake/mybatislogparser
+ghcr.io/drunkbug/mybatislogparser
 ```
 
 ## Deploy with docker-compose
