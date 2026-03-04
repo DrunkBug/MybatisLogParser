@@ -1,128 +1,125 @@
-# MyBatis Log Parser
+# MyBatis 日志解析器
 
-A React-based web application for parsing and formatting MyBatis SQL logs. This tool extracts SQL statements and their parameters from MyBatis log output and converts them into executable, formatted SQL queries.
+这是一个基于 React 的 Web 应用，用于解析和格式化 MyBatis SQL 日志。  
+它可以从 MyBatis 日志中提取 SQL 语句和参数，并生成可执行且格式化后的 SQL。
 
-## Features
+## 功能特性
 
-- Parse MyBatis log format to extract SQL statements with parameter placeholders
-- Replace parameter placeholders with actual values based on parameter types
-- Format SQL output for better readability using sql-formatter
-- Syntax highlighting for SQL code with react-syntax-highlighter
-- One-click functionality to automatically paste, parse, and copy formatted SQL
-- Manual parsing and clearing capabilities
-- Responsive UI with Ant Design components
+- 解析 MyBatis 日志格式，提取带占位符的 SQL 语句
+- 根据参数类型替换 SQL 中的 `?` 占位符
+- 使用 `sql-formatter` 对 SQL 进行格式化，提升可读性
+- 使用 `react-syntax-highlighter` 进行 SQL 语法高亮
+- 支持一键自动粘贴、解析并复制格式化 SQL
+- 支持手动解析与清空内容
+- 使用 Tailwind CSS 与轻量可复用 UI 组件，适配响应式布局
 
-## Technology Stack
+## 技术栈
 
-- **Frontend Framework**: React (v19.0.0)
-- **UI Components**: Ant Design (v5.23.0) and Ant Design Icons (v5.5.2)
-- **Styling**: Tailwind CSS (v3.4.17) with PostCSS (v8.4.49) and Autoprefixer (v10.4.20)
-- **SQL Processing**: sql-formatter (v15.6.5) for SQL formatting
-- **Code Display**: react-syntax-highlighter (v15.6.1) for SQL syntax highlighting
-- **Build Tools**: react-scripts (v5.0.1), react-app-rewired (v2.2.1)
+- **前端框架**：React（v19.0.0）
+- **UI 组件**：Radix Slot + 自定义基础组件（Button/Card/Alert/Textarea）
+- **样式方案**：Tailwind CSS（v3.4.17）+ PostCSS（v8.4.49）+ Autoprefixer（v10.4.20）
+- **SQL 处理**：sql-formatter（v15.6.5）
+- **代码高亮**：react-syntax-highlighter（v15.6.1）
+- **构建工具**：react-scripts（v5.0.1）
 
-## Project Structure
+## 项目结构
 
-```
+```text
 MybatisLogParser/
-├── public/                 # Static assets and HTML template
+├── public/                 # 静态资源与 HTML 模板
 ├── src/
-│   ├── components/         # React components
-│   │   ├── mybatis-log-parser.tsx  # Main application component
-│   │   └── ss.css          # Component-specific styles
-│   ├── App.js              # Main App component
-│   ├── index.js            # Application entry point
-│   └── ...                 # Other React boilerplate files
-├── package.json            # Dependencies and scripts
-├── tailwind.config.js      # Tailwind CSS configuration
-├── postcss.config.js       # PostCSS configuration
-└── onfig-overrides.js      # Webpack configuration overrides
+│   ├── components/         # React 组件
+│   │   ├── mybatis-log-parser.tsx  # 主业务组件
+│   │   └── ui/             # 可复用 UI 原子组件
+│   ├── lib/                # 工具函数
+│   └── index.js            # 应用入口
+├── package.json            # 依赖与脚本
+├── tailwind.config.js      # Tailwind 配置
+├── postcss.config.js       # PostCSS 配置
+├── Dockerfile              # 容器构建与运行定义
+└── docker-compose.yml      # 容器编排配置
 ```
 
-## Available Scripts
+## 可用脚本
 
-In the project directory, you can run:
+在项目根目录可执行以下命令：
 
-### `npm start`
+### `pnpm start`
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+启动开发模式。  
+浏览器访问 [http://localhost:3000](http://localhost:3000) 查看页面。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+修改代码后页面会自动刷新。  
+控制台会输出编译或 lint 信息。
 
-### `npm test`
+### `pnpm test`
 
-Launches the test runner in interactive watch mode.
+运行测试（默认 watch 模式）。
 
-### `npm run build`
+### `pnpm build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+构建生产版本到 `build` 目录。  
+构建产物会压缩并带有 hash 文件名，可直接部署。
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Docker 镜像构建（GitHub Actions + GHCR）
 
-## Docker Image Build (GitHub Actions + GHCR)
+仓库内置工作流：`.github/workflows/docker-image.yml`。
 
-The repository includes a workflow: `.github/workflows/docker-image.yml`.
+- 推送到 `main`/`master` 或发布如 `v1.0.0` 的 tag 时，会自动构建并推送镜像到 `ghcr.io`
+- 向 `main`/`master` 发起 PR 时，仅执行 Docker 构建校验，不推送镜像
 
-- On push to `main` or tags like `v1.0.0`, GitHub Actions builds and pushes image to `ghcr.io`.
-- On PR to `main`, it only validates Docker build (no push).
-
-Image naming rule:
+镜像命名规则：
 
 ```text
 ghcr.io/<owner>/<repo>
 ```
 
-For this repository, it will be:
+本仓库镜像名示例：
 
 ```text
 ghcr.io/drunkbug/mybatislogparser
 ```
 
-## Deploy with docker-compose
+## 使用 docker-compose 部署
 
-1. Prepare env file:
+1. 准备环境变量文件：
 
 ```bash
 cp .env.example .env
 ```
 
-2. Login to GHCR on target server:
+2. 在目标服务器登录 GHCR：
 
 ```bash
 echo "<GHCR_PAT>" | docker login ghcr.io -u "<github-username>" --password-stdin
 ```
 
-3. Pull and start:
+3. 拉取并启动服务：
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-4. Check service:
+4. 检查服务状态：
 
 ```bash
 docker compose ps
 curl -f http://127.0.0.1:${HTTP_PORT:-3003}/healthz
 ```
 
-The application will be exposed on `127.0.0.1:${HTTP_PORT}` (default `127.0.0.1:3003`).
+应用默认暴露在 `127.0.0.1:${HTTP_PORT}`（默认端口 `3003`）。
 
-## How to Use
+## 使用说明
 
-1. Copy MyBatis log output containing SQL statements
-2. Click "自动粘贴并解析" (Auto Paste and Parse) to automatically paste from clipboard and parse the SQL
-3. The formatted SQL will appear in the output area with syntax highlighting
-4. Click "复制" (Copy) to copy the formatted SQL to clipboard
-5. Use "清空" (Clear) to reset the input and output areas
+1. 复制包含 SQL 的 MyBatis 日志
+2. 点击“自动粘贴解析”，自动读取剪贴板并解析 SQL
+3. 格式化后的 SQL 会显示在右侧结果区域并带语法高亮
+4. 点击“复制 SQL”将结果复制到剪贴板
+5. 点击“清空”重置输入与输出
 
-## Configuration
+## 配置说明
 
-- Uses react-app-rewired with custom webpack configuration in `onfig-overrides.js`
-- Tailwind CSS with customized theme settings
-- SQL formatting with mysql language specification
-- Automatic clipboard operations for enhanced user experience
+- 基于 Tailwind CSS 的主题与样式变量
+- `sql-formatter` 使用 `mysql` 语言配置进行格式化
+- 启用剪贴板读写，优化日志处理流程
