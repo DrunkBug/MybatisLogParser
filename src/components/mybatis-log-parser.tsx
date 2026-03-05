@@ -322,128 +322,138 @@ const MybatisLogParser = () => {
           sidebarOpen ? "ml-72" : "ml-0"
         )}
       >
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">
-            MyBatis Log Parser
-          </h1>
-          <p className="text-sm text-slate-300 md:text-base">
-            粘贴 MyBatis 日志，一键解析参数并格式化 SQL。
-          </p>
-        </header>
+        <div className="mx-auto max-w-6xl space-y-6">
+          <header className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">
+              MyBatis Log Parser
+            </h1>
+            <p className="text-sm text-slate-300 md:text-base">
+              粘贴 MyBatis 日志，一键解析参数并格式化 SQL。
+            </p>
+          </header>
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card className="flex h-[620px] flex-col border-border/70 bg-card/85 backdrop-blur-sm">
-            <CardHeader className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Terminal className="h-5 w-5 text-primary" />
-                  <CardTitle>Input Log</CardTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={handleAutoPaste}
-                    disabled={isCopying}
-                    variant="secondary"
-                    className="gap-2"
-                  >
-                    <Scissors className="h-4 w-4" />
-                    {isCopying ? "处理中..." : "自动粘贴解析"}
-                  </Button>
-                  <Button onClick={handleClear} variant="outline" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <CardDescription>支持包含 Preparing 与 Parameters 的日志片段。</CardDescription>
-            </CardHeader>
-
-            <CardContent className="flex flex-1 flex-col gap-4">
-              <Textarea
-                value={sqlLog}
-                onChange={(e) => setSqlLog(e.target.value)}
-                placeholder="粘贴 MyBatis 日志，例如：Preparing: ...  Parameters: ..."
-                className="h-full resize-none bg-slate-950/55 font-mono text-sm leading-6 text-slate-100"
-                spellCheck={false}
-              />
-
-              <Button onClick={handleParse} className="h-11 gap-2 text-sm font-semibold">
-                <Code2 className="h-4 w-4" />
-                解析 SQL
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="flex h-[620px] flex-col border-border/70 bg-card/85 backdrop-blur-sm">
-            <CardHeader className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-accent" />
-                  <CardTitle>Parsed SQL</CardTitle>
-                </div>
-                <Button
-                  onClick={handleCopy}
-                  variant="outline"
-                  className="gap-2"
-                  disabled={!formattedSQL}
-                >
-                  <Copy className="h-4 w-4" />
-                  复制 SQL
-                </Button>
-              </div>
-              <CardDescription>自动格式化关键字，便于排查和执行。</CardDescription>
-            </CardHeader>
-
-            <CardContent className="relative flex-1">
-              <div className="h-full overflow-hidden rounded-lg border border-input bg-slate-950/70">
-                {formattedSQL ? (
-                  <SyntaxHighlighter
-                    language="sql"
-                    style={vscDarkPlus}
-                    showLineNumbers
-                    wrapLines
-                    customStyle={{
-                      margin: 0,
-                      height: "100%",
-                      background: "transparent",
-                      fontSize: "14px",
-                      lineHeight: "1.6"
-                    }}
-                  >
-                    {formattedSQL}
-                  </SyntaxHighlighter>
-                ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
-                    <Code2 className="h-12 w-12 opacity-35" />
-                    <p className="text-sm">解析结果会显示在这里</p>
+          <section className="flex flex-col gap-6 lg:flex-row">
+            <Card
+              className={cn(
+                "flex h-[620px] min-w-0 flex-col border-border/70 bg-card/85 backdrop-blur-sm transition-all duration-500 ease-in-out w-full",
+                formattedSQL ? "lg:w-[calc(35%-0.75rem)] lg:opacity-80" : "lg:w-[calc(50%-0.75rem)] lg:opacity-100"
+              )}
+            >
+              <CardHeader className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-5 w-5 text-primary" />
+                    <CardTitle>Input Log</CardTitle>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={handleAutoPaste}
+                      disabled={isCopying}
+                      variant="secondary"
+                      className="gap-2"
+                    >
+                      <Scissors className="h-4 w-4" />
+                      {isCopying ? "处理中..." : "自动粘贴解析"}
+                    </Button>
+                    <Button onClick={handleClear} variant="outline" size="icon">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <CardDescription>支持包含 Preparing 与 Parameters 的日志片段。</CardDescription>
+              </CardHeader>
 
-      {notification.message && (
-        <div className="fixed bottom-6 left-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 animate-in slide-in-from-bottom-2 duration-300">
-          <Alert
-            className={cn(
-              "border shadow-2xl backdrop-blur-md",
-              notification.type === "success"
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                : "border-red-500/40 bg-red-500/10 text-red-200"
-            )}
-          >
-            {notification.type === "success" ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-300" />
-            )}
-            <AlertTitle>{notification.type === "success" ? "操作成功" : "操作失败"}</AlertTitle>
-            <AlertDescription>{notification.message}</AlertDescription>
-          </Alert>
+              <CardContent className="flex flex-1 flex-col gap-4">
+                <Textarea
+                  value={sqlLog}
+                  onChange={(e) => setSqlLog(e.target.value)}
+                  placeholder="粘贴 MyBatis 日志，例如：Preparing: ...  Parameters: ..."
+                  className="h-full resize-none bg-slate-950/55 font-mono text-sm leading-6 text-slate-100"
+                  spellCheck={false}
+                />
+
+                <Button onClick={handleParse} className="h-11 gap-2 text-sm font-semibold">
+                  <Code2 className="h-4 w-4" />
+                  解析 SQL
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card
+              className={cn(
+                "flex h-[620px] min-w-0 flex-col border-border/70 bg-card/85 backdrop-blur-sm transition-all duration-500 ease-in-out w-full",
+                formattedSQL ? "lg:w-[calc(65%-0.75rem)] shadow-lg shadow-accent/10" : "lg:w-[calc(50%-0.75rem)]"
+              )}
+            >
+              <CardHeader className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-5 w-5 text-accent" />
+                    <CardTitle>Parsed SQL</CardTitle>
+                  </div>
+                  <Button
+                    onClick={handleCopy}
+                    variant="outline"
+                    className="gap-2"
+                    disabled={!formattedSQL}
+                  >
+                    <Copy className="h-4 w-4" />
+                    复制 SQL
+                  </Button>
+                </div>
+                <CardDescription>自动格式化关键字，便于排查和执行。</CardDescription>
+              </CardHeader>
+
+              <CardContent className="relative flex-1 min-h-0">
+                <div className="h-full overflow-auto rounded-lg border border-input bg-slate-950/70">
+                  {formattedSQL ? (
+                    <SyntaxHighlighter
+                      language="sql"
+                      style={vscDarkPlus}
+                      showLineNumbers
+                      wrapLines
+                      customStyle={{
+                        margin: 0,
+                        height: "100%",
+                        background: "transparent",
+                        fontSize: "14px",
+                        lineHeight: "1.6"
+                      }}
+                    >
+                      {formattedSQL}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
+                      <Code2 className="h-12 w-12 opacity-35" />
+                      <p className="text-sm">解析结果会显示在这里</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
         </div>
-      )}
+
+        {notification.message && (
+          <div className="fixed bottom-6 left-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 animate-in slide-in-from-bottom-2 duration-300">
+            <Alert
+              className={cn(
+                "border shadow-2xl backdrop-blur-md",
+                notification.type === "success"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                  : "border-red-500/40 bg-red-500/10 text-red-200"
+              )}
+            >
+              {notification.type === "success" ? (
+                <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-300" />
+              )}
+              <AlertTitle>{notification.type === "success" ? "操作成功" : "操作失败"}</AlertTitle>
+              <AlertDescription>{notification.message}</AlertDescription>
+            </Alert>
+          </div>
+        )}
       </main>
     </div>
   );
