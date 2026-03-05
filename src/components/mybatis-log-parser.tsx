@@ -1,16 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "sql-formatter";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
   Code2,
   Copy,
   Database,
   Scissors,
   Terminal,
-  Trash2
+  Trash2,
+  X
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert.tsx";
@@ -27,6 +31,29 @@ import { cn } from "../lib/utils.ts";
 
 type NotificationType = "success" | "error" | "";
 
+interface HistoryItem {
+  id: string;
+  rawLog: string;
+  parsedSQL: string;
+  timestamp: number;
+}
+
+const HISTORY_KEY = "mybatis-log-parser-history";
+const MAX_HISTORY = 50;
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(items: HistoryItem[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
+}
+
 const MybatisLogParser = () => {
   const [sqlLog, setSqlLog] = useState("");
   const [parsedSQL, setParsedSQL] = useState("");
@@ -35,6 +62,8 @@ const MybatisLogParser = () => {
     type: NotificationType;
   }>({ message: "", type: "" });
   const [isCopying, setIsCopying] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!notification.message) {
@@ -47,6 +76,38 @@ const MybatisLogParser = () => {
 
     return () => clearTimeout(timer);
   }, [notification]);
+
+  const addToHistory = useCallback((rawLog: string, parsed: string) => {
+    setHistory((prev) => {
+      const item: HistoryItem = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        rawLog,
+        parsedSQL: parsed,
+        timestamp: Date.now()
+      };
+      const next = [item, ...prev].slice(0, MAX_HISTORY);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const removeFromHistory = useCallback((id: string) => {
+    setHistory((prev) => {
+      const next = prev.filter((h) => h.id !== id);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    saveHistory([]);
+  }, []);
+
+  const restoreFromHistory = useCallback((item: HistoryItem) => {
+    setSqlLog(item.rawLog);
+    setParsedSQL(item.parsedSQL);
+  }, []);
 
   const showNotification = (message: string, type: Exclude<NotificationType, "">) => {
     setNotification({ message, type });
@@ -130,6 +191,7 @@ const MybatisLogParser = () => {
     }
 
     setParsedSQL(result);
+    addToHistory(sqlLog, result);
     showNotification("SQL 解析成功", "success");
   };
 
@@ -169,6 +231,7 @@ const MybatisLogParser = () => {
       setParsedSQL(result);
       const formatted = formatSQL(result);
       await navigator.clipboard.writeText(formatted);
+      addToHistory(clipboardText, result);
       showNotification("已自动解析并复制", "success");
     } catch {
       showNotification("无法读取剪贴板，请检查权限", "error");
@@ -178,7 +241,87 @@ const MybatisLogParser = () => {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
+    <div className="flex min-h-screen">
+      {/* History Sidebar */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-border/70 bg-card/95 backdrop-blur-md transition-all duration-300",
+          sidebarOpen ? "w-72" : "w-0"
+        )}
+      >
+        {sidebarOpen && (
+          <>
+            <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold text-slate-100">历史记录</span>
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                  {history.length}
+                </span>
+              </div>
+              {history.length > 0 && (
+                <Button variant="ghost" size="sm" onClick={clearHistory} className="h-7 px-2 text-xs text-muted-foreground hover:text-red-300">
+                  清空
+                </Button>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {history.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 pt-12 text-muted-foreground">
+                  <Clock className="h-8 w-8 opacity-30" />
+                  <p className="text-xs">暂无历史记录</p>
+                </div>
+              ) : (
+                <ul className="space-y-1.5">
+                  {history.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => restoreFromHistory(item)}
+                        className="group relative w-full rounded-md border border-transparent px-3 py-2.5 text-left transition-colors hover:border-border/70 hover:bg-secondary/50"
+                      >
+                        <p className="line-clamp-2 font-mono text-xs leading-5 text-slate-300">
+                          {item.parsedSQL}
+                        </p>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {new Date(item.timestamp).toLocaleString()}
+                        </p>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); removeFromHistory(item.id); }}
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); removeFromHistory(item.id); } }}
+                          className="absolute right-1.5 top-1.5 hidden rounded p-0.5 text-muted-foreground hover:text-red-300 group-hover:block"
+                        >
+                          <X className="h-3 w-3" />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
+      </aside>
+
+      {/* Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen((v) => !v)}
+        className={cn(
+          "fixed top-1/2 z-50 flex h-10 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border/70 bg-card/90 text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:text-slate-100",
+          sidebarOpen ? "left-72" : "left-0"
+        )}
+      >
+        {sidebarOpen ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+      </button>
+
+      {/* Main Content */}
+      <main
+        className={cn(
+          "min-h-screen flex-1 p-4 transition-all duration-300 md:p-8",
+          sidebarOpen ? "ml-72" : "ml-0"
+        )}
+      >
       <div className="mx-auto max-w-6xl space-y-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">
@@ -301,7 +444,8 @@ const MybatisLogParser = () => {
           </Alert>
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 };
 
