@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "sql-formatter";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import {
   AlertCircle,
   CheckCircle2,
@@ -11,7 +11,9 @@ import {
   Code2,
   Copy,
   Database,
+  Moon,
   Scissors,
+  Sun,
   Terminal,
   Trash2,
   X
@@ -22,7 +24,6 @@ import { Button } from "./ui/button.tsx";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle
 } from "./ui/card.tsx";
@@ -54,6 +55,16 @@ function saveHistory(items: HistoryItem[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
 }
 
+const THEME_KEY = "mybatis-log-parser-theme";
+
+function getInitialTheme(): "light" | "dark" {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {}
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 const MybatisLogParser = () => {
   const [sqlLog, setSqlLog] = useState("");
   const [parsedSQL, setParsedSQL] = useState("");
@@ -64,6 +75,16 @@ const MybatisLogParser = () => {
   const [isCopying, setIsCopying] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }, []);
 
   useEffect(() => {
     if (!notification.message) {
@@ -245,7 +266,7 @@ const MybatisLogParser = () => {
       {/* History Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-border/70 bg-card/95 backdrop-blur-md transition-all duration-300",
+          "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-border/50 bg-card/80 shadow-sm backdrop-blur-xl dark:border-border/40 dark:bg-card/60 dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.06)] transition-[width] duration-300",
           sidebarOpen ? "w-72" : "w-0"
         )}
       >
@@ -254,13 +275,13 @@ const MybatisLogParser = () => {
             <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold text-slate-100">历史记录</span>
+                <span className="text-sm font-semibold text-foreground">历史记录</span>
                 <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
                   {history.length}
                 </span>
               </div>
               {history.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearHistory} className="h-7 px-2 text-xs text-muted-foreground hover:text-red-300">
+                <Button variant="ghost" size="sm" onClick={clearHistory} className="h-7 px-2 text-xs text-muted-foreground hover:text-red-600 dark:hover:text-red-300">
                   清空
                 </Button>
               )}
@@ -279,7 +300,7 @@ const MybatisLogParser = () => {
                         onClick={() => restoreFromHistory(item)}
                         className="group relative w-full rounded-md border border-transparent px-3 py-2.5 text-left transition-colors hover:border-border/70 hover:bg-secondary/50"
                       >
-                        <p className="line-clamp-2 font-mono text-xs leading-5 text-slate-300">
+                        <p className="line-clamp-2 font-mono text-xs leading-5 text-foreground/80">
                           {item.parsedSQL}
                         </p>
                         <p className="mt-1 text-[10px] text-muted-foreground">
@@ -290,7 +311,7 @@ const MybatisLogParser = () => {
                           tabIndex={0}
                           onClick={(e) => { e.stopPropagation(); removeFromHistory(item.id); }}
                           onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); removeFromHistory(item.id); } }}
-                          className="absolute right-1.5 top-1.5 hidden rounded p-0.5 text-muted-foreground hover:text-red-300 group-hover:block"
+                          className="absolute right-1.5 top-1.5 hidden rounded p-0.5 text-muted-foreground hover:text-red-600 dark:hover:text-red-300 group-hover:block"
                         >
                           <X className="h-3 w-3" />
                         </span>
@@ -308,7 +329,7 @@ const MybatisLogParser = () => {
       <button
         onClick={() => setSidebarOpen((v) => !v)}
         className={cn(
-          "fixed top-1/2 z-50 flex h-10 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border/70 bg-card/90 text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:text-slate-100",
+          "fixed top-1/2 z-50 flex h-10 w-5 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-border/50 bg-card/80 text-muted-foreground shadow-sm backdrop-blur-xl dark:border-border/40 dark:bg-card/60 dark:shadow-none transition-[left,color] duration-300 hover:text-foreground",
           sidebarOpen ? "left-72" : "left-0"
         )}
       >
@@ -318,74 +339,77 @@ const MybatisLogParser = () => {
       {/* Main Content */}
       <main
         className={cn(
-          "min-h-screen flex-1 p-4 transition-all duration-300 md:p-8",
+          "min-h-screen flex-1 p-4 transition-[margin] duration-300 md:p-8",
           sidebarOpen ? "ml-72" : "ml-0"
         )}
       >
         <div className="mx-auto max-w-6xl space-y-6">
-          <header className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">
-              MyBatis Log Parser
-            </h1>
-            <p className="text-sm text-slate-300 md:text-base">
-              粘贴 MyBatis 日志，一键解析参数并格式化 SQL。
-            </p>
+          <header className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+                MyBatis Log Parser
+              </h1>
+              <p className="text-sm text-muted-foreground md:text-base">
+                粘贴 MyBatis 日志，一键解析参数并格式化 SQL。
+              </p>
+            </div>
+            <Button variant="outline" size="icon" onClick={toggleTheme} className="shrink-0">
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
           </header>
 
           <section className="flex flex-col gap-6 lg:flex-row">
             <Card
               className={cn(
-                "flex h-[620px] min-w-0 flex-col border-border/70 bg-card/85 backdrop-blur-sm transition-all duration-500 ease-in-out w-full",
+                "flex h-[620px] min-w-0 flex-col border-border/50 bg-card/80 shadow-sm backdrop-blur-xl dark:border-border/40 dark:bg-card/60 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[width,opacity] duration-500 ease-in-out w-full",
                 formattedSQL ? "lg:w-[calc(35%-0.75rem)] lg:opacity-80" : "lg:w-[calc(50%-0.75rem)] lg:opacity-100"
               )}
             >
-              <CardHeader className="space-y-4">
+              <CardHeader>
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <Terminal className="h-5 w-5 text-primary" />
                     <CardTitle>Input Log</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button onClick={handleParse} className={cn("items-center justify-center overflow-hidden transition-[width,padding,gap] duration-500", formattedSQL ? "w-9 gap-0 px-0" : "gap-2")}>
+                      <Code2 className="h-4 w-4 shrink-0" />
+                      <span className={cn("whitespace-nowrap transition-[opacity,max-width] duration-500", formattedSQL ? "max-w-0 opacity-0" : "max-w-[6rem] opacity-100")}>解析 SQL</span>
+                    </Button>
                     <Button
                       onClick={handleAutoPaste}
                       disabled={isCopying}
                       variant="secondary"
-                      className="gap-2"
+                      className={cn("items-center justify-center overflow-hidden transition-[width,padding,gap] duration-500", formattedSQL ? "w-9 gap-0 px-0" : "gap-2")}
                     >
-                      <Scissors className="h-4 w-4" />
-                      {isCopying ? "处理中..." : "自动粘贴解析"}
+                      <Scissors className="h-4 w-4 shrink-0" />
+                      <span className={cn("whitespace-nowrap transition-[opacity,max-width] duration-500", formattedSQL ? "max-w-0 opacity-0" : "max-w-[8rem] opacity-100")}>{isCopying ? "处理中..." : "自动粘贴解析"}</span>
                     </Button>
-                    <Button onClick={handleClear} variant="outline" size="icon">
+                    <Button onClick={handleClear} variant="outline" size="icon" className="shrink-0">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <CardDescription>支持包含 Preparing 与 Parameters 的日志片段。</CardDescription>
               </CardHeader>
 
-              <CardContent className="flex flex-1 flex-col gap-4">
+              <CardContent className="flex flex-1 flex-col">
                 <Textarea
                   value={sqlLog}
                   onChange={(e) => setSqlLog(e.target.value)}
                   placeholder="粘贴 MyBatis 日志，例如：Preparing: ...  Parameters: ..."
-                  className="h-full resize-none bg-slate-950/55 font-mono text-sm leading-6 text-slate-100"
+                  className="h-full resize-none bg-muted/50 font-mono text-sm leading-6 text-foreground"
                   spellCheck={false}
                 />
-
-                <Button onClick={handleParse} className="h-11 gap-2 text-sm font-semibold">
-                  <Code2 className="h-4 w-4" />
-                  解析 SQL
-                </Button>
               </CardContent>
             </Card>
 
             <Card
               className={cn(
-                "flex h-[620px] min-w-0 flex-col border-border/70 bg-card/85 backdrop-blur-sm transition-all duration-500 ease-in-out w-full",
+                "flex h-[620px] min-w-0 flex-col border-border/50 bg-card/80 shadow-sm backdrop-blur-xl dark:border-border/40 dark:bg-card/60 dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[width,box-shadow] duration-500 ease-in-out w-full",
                 formattedSQL ? "lg:w-[calc(65%-0.75rem)] shadow-lg shadow-accent/10" : "lg:w-[calc(50%-0.75rem)]"
               )}
             >
-              <CardHeader className="space-y-4">
+              <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Database className="h-5 w-5 text-accent" />
@@ -401,15 +425,14 @@ const MybatisLogParser = () => {
                     复制 SQL
                   </Button>
                 </div>
-                <CardDescription>自动格式化关键字，便于排查和执行。</CardDescription>
               </CardHeader>
 
               <CardContent className="relative flex-1 min-h-0">
-                <div className="h-full overflow-auto rounded-lg border border-input bg-slate-950/70">
+                <div className="h-full overflow-auto rounded-lg border border-input bg-muted/50">
                   {formattedSQL ? (
                     <SyntaxHighlighter
                       language="sql"
-                      style={vscDarkPlus}
+                      style={theme === "dark" ? vscDarkPlus : oneLight}
                       showLineNumbers
                       wrapLines
                       customStyle={{
@@ -438,16 +461,16 @@ const MybatisLogParser = () => {
           <div className="fixed bottom-6 left-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 animate-in slide-in-from-bottom-2 duration-300">
             <Alert
               className={cn(
-                "border shadow-2xl backdrop-blur-md",
+                "border shadow-2xl backdrop-blur-md bg-card/80 dark:bg-transparent",
                 notification.type === "success"
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                  : "border-red-500/40 bg-red-500/10 text-red-200"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+                  : "border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-200"
               )}
             >
               {notification.type === "success" ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-red-300" />
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-300" />
               )}
               <AlertTitle>{notification.type === "success" ? "操作成功" : "操作失败"}</AlertTitle>
               <AlertDescription>{notification.message}</AlertDescription>

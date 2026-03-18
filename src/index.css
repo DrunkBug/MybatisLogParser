@@ -6,6 +6,27 @@
 
 @layer base {
   :root {
+    --background: 220 20% 97%;
+    --foreground: 224 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 47% 11%;
+    --primary: 212 92% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 224 47% 11%;
+    --muted: 220 14% 95%;
+    --muted-foreground: 220 9% 43%;
+    --accent: 160 84% 36%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --ring: 212 92% 45%;
+    --radius: 0.9rem;
+  }
+
+  .dark {
     --background: 224 71% 4%;
     --foreground: 210 20% 98%;
     --card: 225 35% 10%;
@@ -23,7 +44,6 @@
     --border: 217 20% 24%;
     --input: 217 20% 24%;
     --ring: 212 100% 62%;
-    --radius: 0.9rem;
   }
 
   * {
@@ -33,29 +53,53 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     min-height: 100vh;
+    background-attachment: fixed;
+  }
+
+  .dark body {
     background-image:
       radial-gradient(circle at 16% 18%, rgba(56, 189, 248, 0.14), transparent 34%),
       radial-gradient(circle at 84% 22%, rgba(16, 185, 129, 0.12), transparent 32%),
       radial-gradient(circle at 50% 100%, rgba(99, 102, 241, 0.1), transparent 42%);
-    background-attachment: fixed;
+  }
+
+  :root:not(.dark) body {
+    background-image:
+      radial-gradient(ellipse at 0% 0%, rgba(99, 102, 241, 0.07), transparent 50%),
+      radial-gradient(ellipse at 100% 0%, rgba(56, 189, 248, 0.06), transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(16, 185, 129, 0.05), transparent 50%);
   }
 }
 
 /* Custom Scrollbar */
+.dark ::-webkit-scrollbar,
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.dark ::-webkit-scrollbar-track {
   background: rgba(15, 23, 42, 0.5);
 }
 
-::-webkit-scrollbar-thumb {
+.dark ::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #475569;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
